@@ -10,8 +10,6 @@
   displayKanap(article);
 })();
 
-const img = document.querySelector(".item__img");
-
 function getKanapId() {
   return new URL(location.href).searchParams.get("id");
 }
@@ -30,6 +28,8 @@ function getArticle(kanapId) {
 }
 
 function displayKanap(article) {
+  let img = document.querySelector(".item__img");
+
   document.querySelector("title").textContent = article.name;
 
   img.innerHTML = `<img src="${article.imageUrl}" alt="${article.altTxt}"></img>`;
@@ -46,12 +46,55 @@ function displayKanap(article) {
   console.log(article.colors);
 
   article.colors.forEach((colorKanap) => {
-    console.log(document.createElement("option"));
     let baliseOption = document.createElement("option");
-    
+
     baliseOption.innerHTML = `${colorKanap}`;
     baliseOption.value = `${colorKanap}`;
 
     colorProduct.appendChild(baliseOption);
+    console.log(baliseOption.value);
   });
+
+  
+  
+  // TEST
+  
+  let productQuantity = document.getElementById("quantity");
+  console.log(productQuantity.value);
+  if (productQuantity.value != 0){
+    
+  }
+
+  //............Gestion Panier..............;
+
+  // let addToCart = document.getElementById("addToCart");
+  // addToCart.addEventListener("click", addBasket(article));
+
+  // function saveBasket(basket) {
+  //   localStorage.setItem("produit", JSON.stringify(basket));
+  // }
+
+  // function getBasket() {
+  //   let basket = localStorage.getItem("produit");
+  //   if (basket == null) {
+  //     return [];
+  //   } else {
+  //     return JSON.parse(basket);
+  //   }
+  // }
+
+  // function addBasket(product) {
+  //   let basket = getBasket();
+  //   let foundProduct = basket.find((p) => p.id == product.id);
+  //   if (foundProduct != undefined) {
+  //     foundProduct.quantity++;
+  //   } else {
+  //     product.quantity = 1;
+  //     basket.push(product);
+  //   }
+  //   saveBasket(basket);
+  // }
 }
+
+// rafraichir la page
+// location.reload();
