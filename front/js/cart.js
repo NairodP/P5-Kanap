@@ -1,24 +1,48 @@
-let kanapData = [];
+let addProduct = JSON.parse(localStorage.getItem("produit"));
+console.log(addProduct);
 
-const kanapDisplay = async () => {
-  fetch(`http://localhost:3000/api/products`)
-    .then((response) => response.json())
-    .then(function (kanapData) {
-      article = kanapData;
-      return kanapData;
+(async function () {
+  const productsData = await getArticles();
+  console.log(productsData);
+  arr1 = productsData;
+  arr2 = addProduct;
+
+  const merge = (arr1, arr2) => {
+    const temp = [];
+
+    arr1.forEach((x) => {
+      arr2.forEach((y) => {
+        if (x._id === y._id) {
+          temp.push({ ...x, ...y });
+        }
+      });
+    });
+    return temp;
+  };
+  let allData = merge(arr1, arr2)
+  console.log(allData);
+
+  cartDisplay(allData);
+})();
+
+
+function getArticles() {
+  return fetch(`http://localhost:3000/api/products/`)
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (productsData) {
+      return productsData;
     })
     .catch(function (error) {
       alert(error);
     });
-};
+}
 
-let addProduct = JSON.parse(localStorage.getItem("produit"));
-console.log(addProduct);
-
-const cartDisplay = async () => {
-  if (addProduct) {
-    await addProduct;
-    document.getElementById("cart__items").innerHTML = addProduct
+function cartDisplay(allData) {
+  // Pour afficher les éléments dans le panier, on vérifie d'abord qu'il y ai qqch dans le local storage
+  if (allData) {
+    document.getElementById("cart__items").innerHTML = allData
       .map(
         (article) =>
           `<article class="cart__item" data-id="${article._id}" data-color="${article.colorSelected}">
@@ -44,32 +68,57 @@ const cartDisplay = async () => {
               </article>`
       )
       .join("");
-
-    let removeToCardBtn = document.getElementsByClassName("deleteItem");
-    console.log(removeToCardBtn);
-    for (i = 0; i < removeToCardBtn.length; i++) {
-      let button = removeToCardBtn[i];
-      button.addEventListener("click", function (event) {
-        let buttonClicked = event.target;
-        buttonClicked.parentElement.parentElement.parentElement.parentElement.remove();
-      });
-    }
-    // let removeFromBasket = addProduct.filter(function(article) {
-    //   let removeToCart = document.getElementsById(`delete.${article._id}`);
-    //   removeToCart.addEventListener("click", () => {
-    //     addProduct = addProduct.filter((p) => p._id != article._id);
-    //     return (
-    //       addProduct.push(article),
-    //       localStorage.setItem("produit", JSON.stringify(addProduct)),
-    //       (addProduct = JSON.parse(localStorage.getItem("produit"))));
-    //       location.reload();
-    // console.log(removeFromBasket);
-    //   })
-    // })
   }
-  console.log(addProduct);
-};
-cartDisplay();
+}
+
+function saveBasket(allData) {
+  localStorage.setItem("produit", JSON.stringify(allData));
+}
+
+function getBasket() {
+  let basket = localStorage.getItem("produit");
+  if (basket == null) {
+    return [];
+  } else {
+    return JSON.parse(basket);
+  }
+}
+
+function getTotalPrice(){
+  let basket = getBasket();
+  let total = 0;
+  for(let article of basket){
+    total += article.quantity * article.price;
+  }
+  return total;
+}
+
+//     let removeToCardBtn = document.getElementsByClassName("deleteItem");
+//     console.log(removeToCardBtn);
+//     for (i = 0; i < removeToCardBtn.length; i++) {
+//       let button = removeToCardBtn[i];
+//       button.addEventListener("click", function (event) {
+//         let buttonClicked = event.target;
+//         buttonClicked.parentElement.parentElement.parentElement.parentElement.remove();
+//       });
+//     }
+//   }
+//   console.log(addProduct);
+// };
+// cartDisplay();
+
+// let removeFromBasket = addProduct.filter(function(article) {
+//   let removeToCart = document.getElementsById(`delete.${article._id}`);
+//   removeToCart.addEventListener("click", () => {
+//     addProduct = addProduct.filter((p) => p._id != article._id);
+//     return (
+//       addProduct.push(article),
+//       localStorage.setItem("produit", JSON.stringify(addProduct)),
+//       (addProduct = JSON.parse(localStorage.getItem("produit"))));
+//       location.reload();
+// console.log(removeFromBasket);
+//   })
+// })
 
 // function saveBasket(basket) {
 //   localStorage.setItem("produit", JSON.stringify(basket));
