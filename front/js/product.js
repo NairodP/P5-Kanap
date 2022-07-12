@@ -90,8 +90,8 @@ function deleteSensibleInformation(article) {
 function addBasket() {
   article.colorSelected = colorProduct.value;
   article.quantity = parseInt(numberOfProduct.value);
-  // ajoute les clefs couleurSelected et numberSelected à l'objet article
-  // console.log(article);
+  // ajoute les clefs couleurSelected et quantity à l'objet article
+  console.log(article);
 
   // supprime tous les éléments 'sensibles' (comme le prix) de l'objet article
   deleteSensibleInformation(article);

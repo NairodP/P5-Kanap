@@ -1,9 +1,12 @@
+// récupère le contenu du localstorage
 let addProduct = JSON.parse(localStorage.getItem("produit"));
-console.log(addProduct);
+// console.log(addProduct); // contenu non sensible localstorage
 
 (async function () {
   const productsData = await getArticles();
-  console.log(productsData);
+  // console.log(productsData); // contenu global récupéré par l'API
+
+  // met en relation nos deux tableaux. Celui du localstorage avec les infos non sensibles, et le tableaux général avec toutes les infos sur les produits récupéré depuis l'API
   arr1 = productsData;
   arr2 = addProduct;
 
@@ -19,13 +22,37 @@ console.log(addProduct);
     });
     return temp;
   };
-  let allData = merge(arr1, arr2)
-  console.log(allData);
+  let allData = merge(arr1, arr2);
+  // console.log(allData); // tableau contenant toutes les infos des produits mises en corélation
 
+  // ajoute le prix total de l'article en fonction de la quantité choisi dans son tableau de données
+  for (let c = 0; c < allData.length; c++) {
+    const unicObject = allData[c];
+    // console.log(unicObject);
+    unicObject.totalPrice = unicObject.quantity * unicObject.price;
+  }
+
+  // calcul le prix total du panier en fonction des articles présents dedans
+  let kanapTotalPrice = [];
+  let targetTotalPrice = document.getElementById("totalPrice");
+  for (let d = 0; d < allData.length; d++) {
+    const calcTotal = allData[d].totalPrice;
+    // console.log(calcTotal);
+    kanapTotalPrice.push(calcTotal);
+    let reducer = (acc, curr) => acc + curr;
+    const totalPrice = kanapTotalPrice.reduce(reducer, 0);
+    targetTotalPrice.textContent = totalPrice;
+  }
+
+  // ajoute toutes les infos des produits en panier dans le localstorage
+  addProduct = allData;
+  localStorage.setItem("produit", JSON.stringify(addProduct));
+
+  // affiche le contenu HTML des produits en localstorage pour qu'ils apparaissent sur la page
   cartDisplay(allData);
 })();
 
-
+// récupère toutes les infos produits depuis l'API
 function getArticles() {
   return fetch(`http://localhost:3000/api/products/`)
     .then(function (response) {
@@ -71,41 +98,84 @@ function cartDisplay(allData) {
   }
 }
 
-function saveBasket(allData) {
-  localStorage.setItem("produit", JSON.stringify(allData));
+// nombre total de produit dans le panier
+let kanapTotalQuantity = [];
+let targetTotalArticleQuantity = document.getElementById("totalQuantity");
+
+for (let a = 0; a < addProduct.length; a++) {
+  const quantityInCart = addProduct[a].quantity;
+  kanapTotalQuantity.push(quantityInCart);
+  // console.log(kanapTotalQuantity);
+  let reducer = (acc, curr) => acc + curr;
+  const totalArticles = kanapTotalQuantity.reduce(reducer, 0);
+  targetTotalArticleQuantity.textContent = totalArticles;
+  // console.log(totalArticles);
 }
 
-function getBasket() {
-  let basket = localStorage.getItem("produit");
-  if (basket == null) {
-    return [];
-  } else {
-    return JSON.parse(basket);
+// Pour supprimer visuellement du panier
+function deleteArticle() {
+  let removeToCardBtn = document.getElementsByClassName("deleteItem");
+  for (b = 0; b < removeToCardBtn.length; b++) {
+    let button = removeToCardBtn[b];
+    button.addEventListener("click", function (event) {
+      let buttonClicked =
+        event.target.parentElement.parentElement.parentElement.parentElement;
+      console.log(buttonClicked);
+      // buttonClicked.remove();
+    });
   }
 }
 
-function getTotalPrice(){
-  let basket = getBasket();
-  let total = 0;
-  for(let article of basket){
-    total += article.quantity * article.price;
-  }
-  return total;
-}
+// function totalPrice() {
+//   // prix total du panier
+//   let kanapTotalPrice = [];
+//   let targetTotalPrice = document.getElementById("totalPrice");
 
-//     let removeToCardBtn = document.getElementsByClassName("deleteItem");
-//     console.log(removeToCardBtn);
-//     for (i = 0; i < removeToCardBtn.length; i++) {
-//       let button = removeToCardBtn[i];
-//       button.addEventListener("click", function (event) {
-//         let buttonClicked = event.target;
-//         buttonClicked.parentElement.parentElement.parentElement.parentElement.remove();
-//       });
-//     }
+//   if (allData) {
+//     allData.forEach((kanap) => {
+//       let priceOfProduct = allData.price;
+//       kanapTotalPrice.push(priceOfProduct);
+//       targetTotalPrice.textContent = eval(kanapTotalPrice.join("+"));
+//     });
 //   }
-//   console.log(addProduct);
-// };
-// cartDisplay();
+// }
+
+// prix total du panier
+// let kanapTotalPrice = [];
+// let targetTotalPrice = document.getElementById("totalPrice");
+
+// if(allData) {
+//   allData.forEach((kanap) => {
+//     kanapTotalPrice.push(kanap.value*quantity);
+//     targetTotalPrice.textContent = eval(kanapTotalPrice.join("+"));
+//   })
+// }
+
+// for( let i = 0; i < localStorage.length; i++){
+//   console.log(localStorage.key(i));
+// }
+
+// function saveBasket(allData) {
+//   localStorage.setItem("produit", JSON.stringify(allData));
+// }
+
+// function getBasket() {
+//   let basket = localStorage.getItem("produit");
+//   if (basket == null) {
+//     return [];
+//   } else {
+//     return JSON.parse(basket);
+//   }
+// }
+
+// function gettTotalPrice(){
+//   let basket = getBasket();
+//   let total = 0;
+//   for(let article of basket){
+//     total += article.quantity * article.price;
+//   }
+//   return total;
+// }
 
 // let removeFromBasket = addProduct.filter(function(article) {
 //   let removeToCart = document.getElementsById(`delete.${article._id}`);
