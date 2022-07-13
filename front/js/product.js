@@ -91,10 +91,10 @@ function addBasket() {
   article.colorSelected = colorProduct.value;
   article.quantity = parseInt(numberOfProduct.value);
   // ajoute les clefs couleurSelected et quantity à l'objet article
-  console.log(article);
-
+  
   // supprime tous les éléments 'sensibles' (comme le prix) de l'objet article
   deleteSensibleInformation(article);
+  console.log(article);
 
   // récupération de ce qui est enregistré sur le local storage
   let produitTableau = JSON.parse(localStorage.getItem("produit"));
@@ -126,7 +126,7 @@ function addBasket() {
       }
     }
     // lorsque l'article est identique mais que la couleur est différente :
-    for (i = 0; i < produitTableau.length; i++) {
+    for (let i = 0; i < produitTableau.length; i++) {
       console.log("Boucle : arret si produit dans le LS identique mais couleur différente");
       if (
         produitTableau[i]._id == article._id &&
@@ -140,7 +140,7 @@ function addBasket() {
       }
     }
     // lorsque le produit n'existe pas dans le local storage :
-    for (i = 0; i < produitTableau.length; i++) {
+    for (let i = 0; i < produitTableau.length; i++) {
       console.log("Produit dans le LS: aucun article identique présent");
       if (produitTableau[i]._id != article._id) {
         return (

@@ -95,8 +95,53 @@ function cartDisplay(allData) {
               </article>`
       )
       .join("");
+    let data = JSON.parse(localStorage.getItem("produit"));
+    // console.log(data); // affiche le localstorage
+    let removeToCardBtn = document.getElementsByClassName("deleteItem");
+    for (let b = 0; b < removeToCardBtn.length; b++) {
+      let buttonDelete = removeToCardBtn[b];
+      buttonDelete.addEventListener("click", (ev) => {
+        // let buttonClicked = ev.target;
+        // console.log(buttonClicked);
+        let buttonClicked =
+          ev.target.parentElement.parentElement.parentElement.parentElement;
+        // console.log(buttonClicked.dataset.id, buttonClicked.dataset.color);
+        idProductForDelete = buttonClicked.dataset.id;
+        colorProductForDelete = buttonClicked.dataset.color;
+        console.log(
+          "id du produit à supprimer :",
+          idProductForDelete,
+          "couleur du produit à supprimer :",
+          colorProductForDelete
+        );
+        for (let k = 0; k < data.length; k++) {
+          if (
+            data[k]._id == idProductForDelete &&
+            data[k].colorSelected == colorProductForDelete
+          ) {
+            data.splice(data[k], 1);
+            location.reload();
+            buttonClicked.remove();
+            localStorage.setItem("produit", JSON.stringify(data)),
+            (data = JSON.parse(localStorage.getItem("produit")));
+            console.log(data);
+          }
+        }
+      });
+    }
   }
 }
+
+// function checkIfNull(allData) {
+//   if (allData == undefined || allData == null || allData == []) {
+//     localStorage.removeItem();
+//     location.reload();
+//     localStorage.setItem("produit", JSON.stringify(allData)),
+//     (allData = JSON.parse(localStorage.getItem("produit")));
+//     console.log(allData);
+//   }
+// }
+
 
 // nombre total de produit dans le panier
 let kanapTotalQuantity = [];
@@ -112,142 +157,70 @@ for (let a = 0; a < addProduct.length; a++) {
   // console.log(totalArticles);
 }
 
-// Pour supprimer visuellement du panier
-function deleteArticle() {
-  let removeToCardBtn = document.getElementsByClassName("deleteItem");
-  for (b = 0; b < removeToCardBtn.length; b++) {
-    let button = removeToCardBtn[b];
-    button.addEventListener("click", function (event) {
-      let buttonClicked =
-        event.target.parentElement.parentElement.parentElement.parentElement;
-      console.log(buttonClicked);
-      // buttonClicked.remove();
-    });
-  }
+// function deleteBasket() {
+
+// récupération de ce qui est enregistré sur le local storage
+let allData = JSON.parse(localStorage.getItem("produit"));
+// console.log(allData); // affichage tableau des infos pour l'article
+
+for (let i = 0; i < allData.length; i++) {
+  const element = allData[i]._id;
+  const element2 = allData[i].colorSelected;
+  console.log("id:", element, ",", "colorSelected:", element2);
 }
 
-// function totalPrice() {
-//   // prix total du panier
-//   let kanapTotalPrice = [];
-//   let targetTotalPrice = document.getElementById("totalPrice");
-
-//   if (allData) {
-//     allData.forEach((kanap) => {
-//       let priceOfProduct = allData.price;
-//       kanapTotalPrice.push(priceOfProduct);
-//       targetTotalPrice.textContent = eval(kanapTotalPrice.join("+"));
-//     });
+// // lorsqu'il n'y a encore rien dans le local storage :
+// if (produitTableau == null) {
+//   produitTableau = [];
+//   produitTableau.push(article);
+//   console.log(produitTableau);
+//   localStorage.setItem("produit", JSON.stringify(produitTableau));
+// }
+// // lorsqu'il n'y a au moins un article dans le local storage :
+// else {
+//   for (let i = 0; i < produitTableau.length; i++) {
+//     console.log("Boucle : arret si produit dans le LS strictement identique");
+//     // lorsque l'article est strictement identique :
+//     if (
+//       produitTableau[i]._id == article._id &&
+//       produitTableau[i].colorSelected == colorProduct.value
+//     ) {
+//       return (
+//         (produitTableau[i].quantity =
+//           parseInt(produitTableau[i].quantity) + parseInt(article.quantity)),
+//         console.log("Sucess add quantity"),
+//         localStorage.setItem("produit", JSON.stringify(produitTableau)),
+//         (produitTableau = JSON.parse(localStorage.getItem("produit")))
+//       );
+//     }
 //   }
-// }
-
-// prix total du panier
-// let kanapTotalPrice = [];
-// let targetTotalPrice = document.getElementById("totalPrice");
-
-// if(allData) {
-//   allData.forEach((kanap) => {
-//     kanapTotalPrice.push(kanap.value*quantity);
-//     targetTotalPrice.textContent = eval(kanapTotalPrice.join("+"));
-//   })
-// }
-
-// for( let i = 0; i < localStorage.length; i++){
-//   console.log(localStorage.key(i));
-// }
-
-// function saveBasket(allData) {
-//   localStorage.setItem("produit", JSON.stringify(allData));
-// }
-
-// function getBasket() {
-//   let basket = localStorage.getItem("produit");
-//   if (basket == null) {
-//     return [];
-//   } else {
-//     return JSON.parse(basket);
+//   // lorsque l'article est identique mais que la couleur est différente :
+//   for (let i = 0; i < produitTableau.length; i++) {
+//     console.log(
+//       "Boucle : arret si produit dans le LS identique mais couleur différente"
+//     );
+//     if (
+//       produitTableau[i]._id == article._id &&
+//       produitTableau[i].colorSelected != colorProduct.value
+//     ) {
+//       return (
+//         produitTableau.push(article),
+//         localStorage.setItem("produit", JSON.stringify(produitTableau)),
+//         (produitTableau = JSON.parse(localStorage.getItem("produit")))
+//       );
+//     }
 //   }
-// }
-
-// function gettTotalPrice(){
-//   let basket = getBasket();
-//   let total = 0;
-//   for(let article of basket){
-//     total += article.quantity * article.price;
-//   }
-//   return total;
-// }
-
-// let removeFromBasket = addProduct.filter(function(article) {
-//   let removeToCart = document.getElementsById(`delete.${article._id}`);
-//   removeToCart.addEventListener("click", () => {
-//     addProduct = addProduct.filter((p) => p._id != article._id);
-//     return (
-//       addProduct.push(article),
-//       localStorage.setItem("produit", JSON.stringify(addProduct)),
-//       (addProduct = JSON.parse(localStorage.getItem("produit"))));
-//       location.reload();
-// console.log(removeFromBasket);
-//   })
-// })
-
-// function saveBasket(basket) {
-//   localStorage.setItem("produit", JSON.stringify(basket));
-// }
-
-// function getBasket() {
-//   let basket = localStorage.getItem("produit");
-//   if (basket == null) {
-//     return [];
-//   } else {
-//     return JSON.parse(basket);
-//   }
-// }
-
-// function addBasket(article) {
-//   let basket = getBasket();
-//   let foundProduct = basket.find((p) => p._id == article._id);
-//   if (foundProduct != undefined) {
-//     foundProduct.quantity++;
-//   } else {
-//     article.quantity = 1;
-//     basket.push(article);
-//   }
-//   saveBasket(basket);
-// }
-
-// function removeFromBasket(article) {
-//   let basket = getBasket();
-//   basket = basket.filter((p) => p._id != article._id);
-//   saveBasket(basket);
-// }
-
-// function changeQuantity(article, quantity) {
-//   let basket = getBasket();
-//   let foundProduct = basket.find((p) => p._id == article._id);
-//   if (foundProduct != undefined) {
-//     foundProduct.quantity += quantity;
-//     if (foundProduct.quantity <= 0) {
-//       removeFromBasket(foundProduct);
-//     } else {
-//       saveBasket(basket);
+//   // lorsque le produit n'existe pas dans le local storage :
+//   for (let i = 0; i < produitTableau.length; i++) {
+//     console.log("Produit dans le LS: aucun article identique présent");
+//     if (produitTableau[i]._id != article._id) {
+//       return (
+//         produitTableau.push(article),
+//         localStorage.setItem("produit", JSON.stringify(produitTableau)),
+//         (produitTableau = JSON.parse(localStorage.getItem("produit")))
+//       );
 //     }
 //   }
 // }
-
-// function getNumberProduct(){
-//   let basket = getBasket();
-//   let number = 0;
-//   for(let article of basket){
-//     number += article.quantity;
-//   }
-//   return number;
-// }
-
-// function getTotalPrice(){
-//   let basket = getBasket();
-//   let total = 0;
-//   for(let article of basket){
-//     total += article.quantity * article.price;
-//   }
-//   return total;
-// }
+// return (produitTableau = JSON.parse(localStorage.getItem("produit")));
+// // }
