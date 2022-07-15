@@ -3,6 +3,8 @@
 let article = undefined;
 
 let colorProduct = document.getElementById("colors");
+colorProduct[0].disabled = true;
+colorProduct.required = true;
 // Gestion des couleurs pour le produit
 // console.log(colorProduct.value);
 // cible la couleur choisi
@@ -13,10 +15,9 @@ numberOfProduct.defaultValue = 1;
 // cible le nombre choisi
 // valeur par défaut = 1 pour éviter un ajout de 0 article au panier
 
-
 (async function () {
   const kanapId = getKanapId();
-  console.log('id du produit : ' + kanapId);
+  console.log("id du produit : " + kanapId);
 
   const article = await getArticle(kanapId);
   console.log(article);
@@ -35,7 +36,7 @@ function getArticle(kanapId) {
       return response.json();
     })
     .then(function (apiArticle) {
-      article = apiArticle
+      article = apiArticle;
       return apiArticle;
     })
     .catch(function (error) {
@@ -78,78 +79,75 @@ function displayKanap(article) {
   });
 }
 
-function deleteSensibleInformation(article) {
-  delete article.price;
-  delete article.colors;
-  delete article.altTxt;
-  delete article.imageUrl;
-  delete article.description;
-  delete article.name;
+function deleteSensibleInformation(a) {
+  delete a.price;
+  delete a.colors;
+  delete a.altTxt;
+  delete a.imageUrl;
+  delete a.description;
+  delete a.name;
 }
 
 function addBasket() {
-  article.colorSelected = colorProduct.value;
-  article.quantity = parseInt(numberOfProduct.value);
-  // ajoute les clefs couleurSelected et quantity à l'objet article
-  
-  // supprime tous les éléments 'sensibles' (comme le prix) de l'objet article
-  deleteSensibleInformation(article);
-  console.log(article);
+  let articleClear = article;
+  // console.log(articleClear);
 
-  // récupération de ce qui est enregistré sur le local storage
-  let produitTableau = JSON.parse(localStorage.getItem("produit"));
-  console.log(produitTableau); // affichage tableau des infos pour l'article
+  articleClear.colorSelected = colorProduct.value;
+  articleClear.quantity = parseInt(numberOfProduct.value);
+  // ajoute les clefs couleurSelected et quantity à l'objet articleClear
 
-  // lorsqu'il n'y a encore rien dans le local storage :
-  if (produitTableau == null) {
-    produitTableau = [];
-    produitTableau.push(article);
-    console.log(produitTableau);
-    localStorage.setItem("produit", JSON.stringify(produitTableau));
+  deleteSensibleInformation(articleClear);
+  // console.log(articleClear);
+
+  if (articleClear.colorSelected != "") {
+    // récupération de ce qui est enregistré sur le local storage
+    let produitTableau = JSON.parse(localStorage.getItem("produit"));
+    // console.log(produitTableau); // affichage tableau des infos pour l'article
+
+    // lorsqu'il n'y a encore rien dans le local storage :
+    if (produitTableau == null) {
+      produitTableau = [];
+      // Ne partage pas les éléments sensibles comme le prix, sans pour autant le supprimer
+      produitTableau.push(articleClear);
+      // console.log(produitTableau);
+      localStorage.setItem("produit", JSON.stringify(produitTableau));
+      return;
+    }
+    // lorsqu'il n'y a au moins un article dans le local storage :
+
+    // le produit est identique
+    else {
+      for (let i = 0; i < produitTableau.length; i++) {
+        if (
+          produitTableau[i]._id == articleClear._id &&
+          produitTableau[i].colorSelected == colorProduct.value
+        ) {
+          produitTableau[i].quantity =
+            produitTableau[i].quantity + articleClear.quantity;
+          localStorage.setItem("produit", JSON.stringify(produitTableau));
+          return;
+        }
+
+        // Le produit à le même id mais pas la même couleur
+        else if (
+          produitTableau[i]._id == articleClear._id &&
+          produitTableau[i].colorSelected != colorProduct.value
+        ) {
+          produitTableau.push(articleClear);
+          localStorage.setItem("produit", JSON.stringify(produitTableau));
+          return;
+        }
+        // Le produit est différent
+        else {
+          produitTableau.push(articleClear);
+          localStorage.setItem("produit", JSON.stringify(produitTableau));
+          return;
+        }
+      }
+    }
+    return;
+  } else {
+    alert("Merci de sélectionner une couleur");
+    return;
   }
-  // lorsqu'il n'y a au moins un article dans le local storage :
-  else {
-    for (let i = 0; i < produitTableau.length; i++) {
-      console.log("Boucle : arret si produit dans le LS strictement identique");
-      // lorsque l'article est strictement identique :
-      if (
-        produitTableau[i]._id == article._id &&
-        produitTableau[i].colorSelected == colorProduct.value
-      ) {
-        return (
-          (produitTableau[i].quantity =
-            parseInt(produitTableau[i].quantity) + parseInt(article.quantity)),
-          console.log("Sucess add quantity"),
-          localStorage.setItem("produit", JSON.stringify(produitTableau)),
-          (produitTableau = JSON.parse(localStorage.getItem("produit")))
-        );
-      }
-    }
-    // lorsque l'article est identique mais que la couleur est différente :
-    for (let i = 0; i < produitTableau.length; i++) {
-      console.log("Boucle : arret si produit dans le LS identique mais couleur différente");
-      if (
-        produitTableau[i]._id == article._id &&
-        produitTableau[i].colorSelected != colorProduct.value
-      ) {
-        return (
-          produitTableau.push(article),
-          localStorage.setItem("produit", JSON.stringify(produitTableau)),
-          (produitTableau = JSON.parse(localStorage.getItem("produit")))
-        );
-      }
-    }
-    // lorsque le produit n'existe pas dans le local storage :
-    for (let i = 0; i < produitTableau.length; i++) {
-      console.log("Produit dans le LS: aucun article identique présent");
-      if (produitTableau[i]._id != article._id) {
-        return (
-          produitTableau.push(article),
-          localStorage.setItem("produit", JSON.stringify(produitTableau)),
-          (produitTableau = JSON.parse(localStorage.getItem("produit")))
-        );
-      }
-    }
-  }
-  return (produitTableau = JSON.parse(localStorage.getItem("produit")));
 }
