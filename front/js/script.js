@@ -1,25 +1,25 @@
-//............Index Page..............;
+//............HOME PAGE.....................
 
+let productsData = [];
 
-let kanapData = [];
-
-const kanapDisplay = async () => {
+//....RECUP INFOS PRODUITS DEPUIS L'API.....
+const productDisplay = async () => {
   fetch(`http://localhost:3000/api/products`)
     .then((response) => response.json())
-    .then((kanapData) => {
-      document.getElementById("items").innerHTML = kanapData
+    .then((productsData) => {
+      document.getElementById("items").innerHTML = productsData
         .map(
-          (kanap) => `<a href="product.html?id=${kanap._id}">
+          (product) => `<a href="product.html?id=${product._id}">
         <article>
-          <img src="${kanap.imageUrl}" alt="${kanap.altTxt}">
-          <h3 class="${kanap.name}">${kanap.name}</h3>
-          <p class="${kanap.description}">${kanap.description}</p>
+          <img src="${product.imageUrl}" alt="${product.altTxt}">
+          <h3 class="${product.name}">${product.name}</h3>
+          <p class="${product.description}">${product.description}</p>
         </article>
       </a>`
         )
         .join("");
-      console.log(kanapData);
+      console.log(productsData);
     });
 };
 
-kanapDisplay();
+productDisplay();

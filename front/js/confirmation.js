@@ -1,7 +1,6 @@
 // récupère le contenu du localstorage
 let data = JSON.parse(localStorage.getItem("produit"));
 
-
 (async function () {
   const productsData = await getArticles();
   // console.log(productsData); // contenu global récupéré par l'API
@@ -33,7 +32,6 @@ let data = JSON.parse(localStorage.getItem("produit"));
   }
 })();
 
-
 // récupère toutes les infos produits depuis l'API
 function getArticles() {
   return fetch(`http://localhost:3000/api/products/`)
@@ -48,20 +46,5 @@ function getArticles() {
     });
 }
 
-
-// poster la commande du client
-const sentPost = async function (data) {
-  let response = await fetch("http://localhost:3000/api/products/order", {
-    method: "POST",
-    Headers: {
-      "Content-type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-  let responseData = await response.json();
-  console.log(responseData);
-  console.log(responseData.id); // affiche l'ID client pour la commande
-};
-
-targetIdConsumer = document.getElementById('orderId');
+targetIdConsumer = document.getElementById("orderId");
 console.log(targetIdConsumer);

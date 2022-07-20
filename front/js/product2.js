@@ -1,52 +1,49 @@
-//............Product Page..............;
+//............PRODUCT PAGE.....................
 
-(async function () {
-  const kanapId = getKanapId();
-  console.log(kanapId);
+let article = undefined;
 
-  const article = await getArticle(kanapId);
-  console.log(article);
+let colorProduct = document.getElementById("colors"); // cible la couleur choisi
+colorProduct[0].disabled = true;
+colorProduct.required = true;
 
-  displayKanap(article);
-})();
+let numberOfProduct = document.getElementById("quantity"); // cible le nombre choisi
+numberOfProduct.defaultValue = 1; // valeur par défaut = 1 pour éviter un ajout de 0 article au panier
 
-//récupérer l'id dans l'URL
+// ..........RECUP ID DANS L'URL................
 function getKanapId() {
   return new URL(location.href).searchParams.get("id");
 }
+//..............................................
 
+// .......RECUP INFOS PRODUIT GRACE A L'ID.......
 function getArticle(kanapId) {
   return fetch(`http://localhost:3000/api/products/${kanapId}`)
     .then(function (response) {
       return response.json();
     })
-    .then(function (articles) {
-      return articles;
+    .then(function (apiArticle) {
+      article = apiArticle;
+      return apiArticle;
     })
     .catch(function (error) {
       alert(error);
     });
 }
+//..............................................
 
-// Afficher les différents éléments du Kanap
+// ........AFFICHE LES ELEMENTS DU KANAP........
 function displayKanap(article) {
+  //Clic sur le bouton ajouter au panier qui déclenche la fonction addBasket
+  let addToCartBtn = document.getElementById("addToCart");
+  addToCartBtn.addEventListener("click", addBasket);
   let img = document.querySelector(".item__img");
 
   document.querySelector("title").textContent = article.name;
-
   img.innerHTML = `<img src="${article.imageUrl}" alt="${article.altTxt}"></img>`;
-
   document.getElementById("title").textContent = article.name;
-
   document.getElementById("price").textContent = article.price;
-
   document.querySelector(".item__content__description__title").textContent =
     article.description;
-
-  // Gestion des couleurs pour le produit
-  let colorProduct = document.getElementById("colors");
-  console.log(colorProduct); // ciblage balise avec id colors
-  console.log(article.colors); // affichage tableau couleurs possibles pour l'articles
 
   // Boucle pour afficher les couleurs dispos pour l'article
   article.colors.forEach((colorKanap) => {
@@ -56,51 +53,90 @@ function displayKanap(article) {
     baliseOption.value = `${colorKanap}`;
 
     colorProduct.appendChild(baliseOption);
-    console.log(baliseOption.value);
     // affichage une par une des couleurs possibles pour l'articles
   });
+}
+//..............................................
 
-  console.log(colorProduct.value); // cible la couleur choisi
-  let numberOfProduct = document.getElementById('quantity')
-  console.log(numberOfProduct.value); // cible le nombre choisi
+// ......LANCE LES DIFFERENTES FONCTIONS........
+(async function () {
+  const kanapId = getKanapId();
+  console.log("id du produit : " + kanapId);
 
-  // ............Gestion Panier..............;
+  const article = await getArticle(kanapId);
+  console.log(article);
 
-  let addToCart = document.getElementById("addToCart");
-  addToCart.addEventListener("click", addBasket);
+  displayKanap(article);
+})();
+//..............................................
 
-  // enregistrement de l'ajout sur le local storage en format JSON
-  function saveBasket(basket) {
-    localStorage.setItem("produit", JSON.stringify(basket));
-  }
+// .............AJOUT AU PANIER.................
+function addBasket() {
+  article.colorSelected = colorProduct.value;
+  article.quantity = parseInt(numberOfProduct.value);
+  // ajoute les clefs 'colorSelected' et 'quantity' à l'objet article
 
-  // récupération de ce qui est enregistré sur le local storage
-  function getBasket() {
-    let basket = localStorage.getItem("produit");
-    if (basket == null) {
-      return [];
-    } else {
-      return JSON.parse(basket);
+  if (article.colorSelected != "") {
+    // récupération de ce qui est enregistré sur le local storage
+    let produitTableau = JSON.parse(localStorage.getItem("produit"));
+    // console.log(produitTableau); // affichage tableau des infos pour l'article
+
+    // lorsqu'il n'y a encore rien dans le local storage :
+    if (produitTableau == null) {
+      produitTableau = [];
+      // Ne partage pas les éléments sensibles comme le prix, sans pour autant le supprimer
+      produitTableau.push({
+        id: article._id,
+        quantity: article.quantity,
+        colorSelected: article.colorSelected,
+      });
+      // console.log(produitTableau);
+      localStorage.setItem("produit", JSON.stringify(produitTableau));
+      return;
     }
-  }
 
-  // ajout produit au panier et vérif si celui-ci n'est pas déjà existant
-  function addBasket(product) {
-    let basket = getBasket();
-    let foundProduct = basket.find((p) => p.id == product.id && p.color == product.color);
-    if (foundProduct != undefined) {
-      foundProduct.quantity = numberOfProduct.value;
-    } else if (foundProduct = basket.find((p) => p.id == product._id)){
-      foundProduct.quantity++;
-    } else {
-      product.quantity = 1;
-      basket.push(product);
+    // Un article est dans le local storage : le produit est identique
+    else {
+      for (let i = 0; i < produitTableau.length; i++) {
+        if (
+          produitTableau[i]._id == article._id &&
+          produitTableau[i].colorSelected == colorProduct.value
+        ) {
+          produitTableau[i].quantity =
+            produitTableau[i].quantity + article.quantity;
+          localStorage.setItem("produit", JSON.stringify(produitTableau));
+          return;
+        }
+
+        // Un article est dans le local storage : même id mais pas même couleur
+        else if (
+          produitTableau[i]._id == article._id &&
+          produitTableau[i].colorSelected != colorProduct.value
+        ) {
+          produitTableau.push({
+            id: article._id,
+            quantity: article.quantity,
+            colorSelected: article.colorSelected,
+          });
+          localStorage.setItem("produit", JSON.stringify(produitTableau));
+          return;
+        }
+
+        // Un article est dans le local storage : article différent
+        else {
+          produitTableau.push({
+            id: article._id,
+            quantity: article.quantity,
+            colorSelected: article.colorSelected,
+          });
+          localStorage.setItem("produit", JSON.stringify(produitTableau));
+          return;
+        }
+      }
     }
-    saveBasket(basket);
+    return;
+  } else {
+    alert("Merci de sélectionner une couleur");
+    return;
   }
 }
-
-// rafraichir la page
-// location.reload();
-
-// alert("Merci d'indiquer un nombre de produits");
