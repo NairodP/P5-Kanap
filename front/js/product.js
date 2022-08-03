@@ -42,7 +42,7 @@ function displayKanap(article) {
     let baliseOption = document.createElement("option");
     baliseOption.innerHTML = `${colors4TheProduct}`;
     baliseOption.value = `${colors4TheProduct}`;
-    
+
     colorProduct.appendChild(baliseOption);
     // AFFICHE LES COULEURS DISPOS POUR L'ARTICLE
   });
@@ -91,18 +91,15 @@ function addBasket() {
 
     // SI ARTICLE DANS LE LS IDENTIQUE
     else {
-      let a =
-        produitTableau[
-          produitTableau.findIndex(
-            (product) =>
-              product.id == article._id &&
-              product.colorSelected == article.colorSelected
-          )
-        ];
+      let productIndex = produitTableau.findIndex(
+        (product) =>
+          product.id == article._id &&
+          product.colorSelected == article.colorSelected
+      );
 
-      if (a) {
-        (a["quantity"] = a["quantity"] + article.quantity),
-          localStorage.setItem("produit", JSON.stringify(produitTableau));
+      if (productIndex > -1) {
+        produitTableau[productIndex].quantity += article.quantity;
+        localStorage.setItem("produit", JSON.stringify(produitTableau));
       }
 
       // SI ARTICLE DANS LE LS DIFFÉRENT
@@ -119,7 +116,6 @@ function addBasket() {
     // SI AUCUNE COULEUR N'EST SÉLECTIONNÉE
   } else {
     alert("Merci de sélectionner une couleur");
-    return;
   }
 }
 //..............................................

@@ -3,18 +3,8 @@
 //.........RECUP CONTENU LOCALSTORAGE..........
 let localStorageContent = JSON.parse(localStorage.getItem("produit"));
 console.log(localStorageContent);
+let tabMerge = undefined;
 //.............................................
-
-//......RECUP INFOS PRODUITS DEPUIS L'API......
-function getArticles() {
-  return fetch(`http://localhost:3000/api/products/`)
-    .then((response) => response.json())
-    .then((productsData) => productsData)
-    .catch((error) => {
-      alert(error);
-    });
-}
-//..............................................
 
 //...........MERGE DES 2 TABLEAUX...............
 function merge(productsData, localStorageContent) {
@@ -31,10 +21,87 @@ function merge(productsData, localStorageContent) {
 }
 //..............................................
 
+// CALCUL PRIX TOTAL PANIER
+function totalPrice() {
+  let productsTotalPrice = [];
+  let targetTotalPrice = document.getElementById("totalPrice");
+  tabMerge.forEach((el) => {
+    productsTotalPrice.push(el.price * el.quantity);
+  });
+  let reducer = (accumulateur, productTotal) => accumulateur + productTotal;
+  let totalPrice = productsTotalPrice.reduce(reducer, 0);
+  targetTotalPrice.textContent = totalPrice;
+  // réduit le tableau à un résultat
+}
+//.............................................
+
+// CALCUL LA QUANTITÉ TOTALE DE PRODUITS DANS LE PANIER
+function totalQuantity() {
+  let productTotalQuantity = [];
+  let targetTotalArticlesQuantity = document.getElementById("totalQuantity");
+
+  for (let i = 0; i < tabMerge.length; i++) {
+    let quantityInCart = tabMerge[i].quantity;
+    productTotalQuantity.push(quantityInCart);
+    let reducer = (accumulateur, product) => accumulateur + product;
+    let totalArticles = productTotalQuantity.reduce(reducer, 0);
+    targetTotalArticlesQuantity.textContent = totalArticles;
+  }
+}
+//.............................................
+
+//......RECUP INFOS PRODUITS DEPUIS L'API......
+fetch(`http://localhost:3000/api/products/`)
+  .then((response) => response.json())
+  .then((productsData) => {
+    tabMerge = merge(productsData, localStorageContent);
+    console.log(tabMerge);
+    totalPrice();
+    // CALCUL PRIX TOTAL PANIER
+    totalQuantity();
+    // CALCUL LA QUANTITÉ TOTALE DE PRODUITS DANS LE PANIER
+    cartDisplay(tabMerge);
+  })
+  .catch((error) => alert(error));
+//..............................................
+
+// SUPPRIME L'ARTICLE DU PANIER AU CLIC SUR LE BTN 'supprimer'
+function removeToCard() {
+  let removeToCardBtn = document.getElementsByClassName("deleteItem");
+  for (let i = 0; i < removeToCardBtn.length; i++) {
+    let buttonDelete = removeToCardBtn[i];
+    buttonDelete.addEventListener("click", (ev) => {
+      ev.preventDefault;
+      let buttonClicked =
+        ev.target.parentElement.parentElement.parentElement.parentElement;
+      idProductForDelete = buttonClicked.dataset.id;
+      colorProductForDelete = buttonClicked.dataset.color;
+      console.log(
+        "id du produit supprimé :",
+        idProductForDelete,
+        "couleur du produit supprimé :",
+        colorProductForDelete
+      );
+      for (let index = 0; index < tabMerge.length; index++) {
+        if (
+          tabMerge[index]._id == idProductForDelete &&
+          tabMerge[index].colorSelected == colorProductForDelete
+        ) {
+          tabMerge.splice(tabMerge[index], 1);
+          buttonClicked.remove();
+          totalPrice();
+          totalQuantity();
+        }
+      }
+    });
+  }
+}
+//.............................................
+
 // AFFICHAGE PRODUITS DANS LE PANIER SI ÉLÉMENTS PRÉSENTS DANS LE LS
-function cartDisplay(allData) {
-  if (allData) {
-    document.getElementById("cart__items").innerHTML = allData
+function cartDisplay(tabMerge) {
+  if (tabMerge) {
+    document.getElementById("cart__items").innerHTML = tabMerge
       .map(
         (article) =>
           `<article class="cart__item" data-id="${article._id}" data-color="${article.colorSelected}">
@@ -65,111 +132,7 @@ function cartDisplay(allData) {
 }
 //..............................................
 
-// ......LANCE LES DIFFERENTES FONCTIONS........
-(async function () {
-  const productsData = await getArticles();
-  console.log(productsData);
-  // CONTENU RECUP DEPUIS L'API
-
-  let allData = merge(productsData, localStorageContent);
-
-  totalProductPrice();
-  // CALCUL LE PRIX TOTAL D'UN ARTICLE EN FONCTION DE SA QUANTITÉ
-
-  totalPrice();
-  // CALCUL PRIX TOTAL PANIER
-
-  totalQuantity();
-  // CALCUL LA QUANTITÉ TOTALE DE PRODUITS DANS LE PANIER
-
-  localStorage.setItem("produit", JSON.stringify(allData));
-  // MET À JOUR LE LS AVEC LE TABLEAU MERGE
-
-  cartDisplay(allData);
-  // AFFICHE CONTENU HTML DEPUIS LES INFOS DU LS
-})();
-//..............................................
-
-//.........RECUP CONTENU LOCALSTORAGE..........
-let allData = JSON.parse(localStorage.getItem("produit"));
-//.............................................
-
-// CALCUL LE PRIX TOTAL D'UN ARTICLE EN FONCTION DE SA QUANTITÉ
-function totalProductPrice() {
-  for (let i = 0; i < allData.length; i++) {
-    allData = JSON.parse(localStorage.getItem("produit"));
-    const productTotalPrice = allData[i];
-    productTotalPrice.totalPrice =
-      productTotalPrice.quantity * productTotalPrice.price;
-    localStorage.setItem("produit", JSON.stringify(allData));
-  }
-  console.log(allData);
-}
-//.............................................
-
-// CALCUL PRIX TOTAL PANIER
-function totalPrice() {
-  let productsTotalPrice = [];
-  let targetTotalPrice = document.getElementById("totalPrice");
-  for (let i = 0; i < allData.length; i++) {
-    const calcTotal = allData[i].totalPrice;
-    productsTotalPrice.push(calcTotal);
-    let reducer = (acc, curr) => acc + curr;
-    const totalPrice = productsTotalPrice.reduce(reducer, 0);
-    targetTotalPrice.textContent = totalPrice;
-  }
-}
-//.............................................
-
-// CALCUL LA QUANTITÉ TOTALE DE PRODUITS DANS LE PANIER
-function totalQuantity() {
-  let productTotalQuantity = [];
-  let targetTotalArticleQuantity = document.getElementById("totalQuantity");
-
-  for (let i = 0; i < allData.length; i++) {
-    const quantityInCart = allData[i].quantity;
-    productTotalQuantity.push(quantityInCart);
-    let reducer = (acc, curr) => acc + curr;
-    const totalArticles = productTotalQuantity.reduce(reducer, 0);
-    targetTotalArticleQuantity.textContent = totalArticles;
-  }
-}
-
-// SUPPRIME L'ARTICLE DU PANIER AU CLIC SUR LE BTN 'supprimer'
-function removeToCard() {
-  let removeToCardBtn = document.getElementsByClassName("deleteItem");
-  for (let i = 0; i < removeToCardBtn.length; i++) {
-    let buttonDelete = removeToCardBtn[i];
-    buttonDelete.addEventListener("click", (ev) => {
-      ev.preventDefault;
-      let buttonClicked =
-        ev.target.parentElement.parentElement.parentElement.parentElement;
-      idProductForDelete = buttonClicked.dataset.id;
-      colorProductForDelete = buttonClicked.dataset.color;
-      console.log(
-        "id du produit supprimé :",
-        idProductForDelete,
-        "couleur du produit supprimé :",
-        colorProductForDelete
-      );
-      for (let a = 0; a < allData.length; a++) {
-        if (
-          allData[a]._id == idProductForDelete &&
-          allData[a].colorSelected == colorProductForDelete
-        ) {
-          allData.splice(allData[a], 1);
-          location.reload();
-          buttonClicked.remove();
-          localStorage.setItem("produit", JSON.stringify(allData)),
-            (allData = JSON.parse(localStorage.getItem("produit")));
-          console.log(allData);
-        }
-      }
-    });
-  }
-}
-//.............................................
-
+// MET À JOUR LES QUANTITÉS
 function updateQuantityProduct() {
   let updateQuantityBtn = document.getElementsByClassName("itemQuantity").value;
   for (let i = 0; i < updateQuantityBtn.length; i++) {
@@ -177,10 +140,9 @@ function updateQuantityProduct() {
     buttonUpdate.addEventListener("change", (ev) => {
       ev.preventDefault;
 
-      allData = JSON.parse(localStorage.getItem("produit"));
       let a =
-        allData[
-          allData.findIndex(
+        tabMerge[
+          tabMerge.findIndex(
             (product) =>
               product.id == article._id &&
               product.colorSelected == article.colorSelected
@@ -189,7 +151,6 @@ function updateQuantityProduct() {
 
       if (a) {
         a["quantity"] = updateQuantityBtn[i].value;
-        localStorage.setItem("produit", JSON.stringify(allData));
         return;
       }
 
@@ -201,88 +162,69 @@ function updateQuantityProduct() {
 
       totalQuantity();
       // CALCUL LA QUANTITÉ TOTALE DE PRODUITS DANS LE PANIER
-
-      allData = JSON.parse(localStorage.getItem("produit"));
-      console.log(allData);
     });
   }
 }
-
-// ..........ENVOI DE LA COMMANDE..............
-async function sentOrder() {
-  const responseApi = await getArticles();
-  allData.push({
-    id: responseApi._id,
-    quantity: responseApi.quantity,
-    colorSelected: responseApi.colorSelected,
-  });
-
-  const finalTab = merge(responseApi, allData);
-  console.log(finalTab);
-
-  localStorage.setItem("produit", JSON.stringify(finalTab));
-  // MET À JOUR LE LS AVEC LE TABLEAU MERGE
-
-  // poster la commande du client
-  const sentPost = async function (finalTab, contact) {
-    let response = await fetch("http://localhost:3000/api/products/order", {
-      method: "POST",
-      Headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(finalTab, contact),
-    });
-    let responseData = await response.json();
-    console.log(responseData);
-    console.log(responseData.id); // affiche l'ID client pour la commande
-    let validationId = responseData.id;
-    let linkConfirmationPage = "./confirmation.html?${validationId}"
-  };
-}
-
-// ..........RECUP ID DANS L'URL................
-function getConsumerId() {
-  return new URL(location.href).searchParams.get("id");
-}
 //.............................................
 
+// ..........ENVOI DE LA COMMANDE..............
 
+let contact = undefined;
 
+// poster la commande du client
+function fetchPost() {
+  fetch("http://localhost:3000/api/products/order", {
+    method: "POST",
+    Headers: {
+      "Content-type": "application/json",
+    },
+    body: JSON.stringify(tabMerge, contact),
+  })
+  .then(res => res.json())
+  .then(res => console.log(res.id))
+  let responseData = await response.json();
+  console.log(responseData);
+  console.log(responseData.id); // affiche l'ID client pour la commande
+  let validationId = responseData.id;
+  // .then document.location
+}
+
+function sentOrder() {
 // .........GESTION DU FORMULAIRE..............
-let form = document.getElementsByClassName("cart__order__form");
 let sentBtn = document.getElementById("order");
 let firstName = document.getElementById("firstName");
 let lastName = document.getElementById("lastName");
 let address = document.getElementById("address");
 let city = document.getElementById("city");
 let email = document.getElementById("email");
-const contact = {
+let contact = {
   Prénom: firstName.value,
   Nom: lastName.value,
   Adresse: address.value,
   Ville: city.value,
   Email: email.value,
-};
-
-//Ecoute le Click d'envoi de commande
-sentBtn.addEventListener("click", function (e) {
-  e.preventDefault();
-  let clientInformation = JSON.parse(localStorage.getItem("contact"));
+}
+  //...Ecoute le Click d'envoi de commande
+  sentBtn.addEventListener("click", function (e) {
+    e.preventDefault();
   if (
     validFirstName(firstName) &&
     validLastName(lastName) &&
     validAddress(address) &&
     validCity(city) &&
-    validEmail(email)
+    validEmail(email) &&
+    tabMerge &&
+    tabMerge.length > 0
   ) {
-    clientInformation.push([contact]);
-    localStorage.setItem("produit", JSON.stringify(clientInformation));
+    fetchPost();
+
     return;
-    sentOrder();
   } else {
-    console.log("Non Valide");
-  }
-});
+    alert("Champ(s) du formulaire Non Valide ou panier Vide !");
+    console.log("Champ(s) du formulaire Non Valide ou panier Vide !");
+    }
+  });
+}
 
 //Ecoute la modification du Prénom
 firstName.addEventListener("change", function () {
@@ -310,7 +252,7 @@ email.addEventListener("change", function () {
 });
 
 // VALIDATION FIRSTNAME
-const validFirstName = function (inputFirstName) {
+function validFirstName(inputFirstName) {
   //Creation de la RegExp pour validation FirstName
   let FirstNameRegExp = new RegExp("^[a-zA-Z]+$", "g");
 
@@ -321,7 +263,7 @@ const validFirstName = function (inputFirstName) {
   if (FirstNameRegExp.test(inputFirstName.value)) {
     pFirstName.innerHTML = "Prénom Valide";
     pFirstName.removeAttribute("style.color");
-    pFirstName.style.color = "green";
+    pFirstName.style.color = "#083B32";
     return true;
   } else {
     pFirstName.innerHTML = "Prénom Non Valide";
@@ -343,7 +285,7 @@ const validLastName = function (inputLastName) {
   if (lastNameRegExp.test(inputLastName.value)) {
     pLastName.innerHTML = "Nom Valide";
     pLastName.removeAttribute("style.color");
-    pLastName.style.color = "green";
+    pLastName.style.color = "#083B32";
     return true;
   } else {
     pLastName.innerHTML = "Nom Non Valide";
@@ -365,7 +307,7 @@ const validAddress = function (inputAddress) {
   if (addressRegExp.test(inputAddress.value)) {
     pAddress.innerHTML = "Adresse Valide";
     pAddress.removeAttribute("style.color");
-    pAddress.style.color = "green";
+    pAddress.style.color = "#083B32";
     return true;
   } else {
     pAddress.innerHTML = "Adresse Non Valide";
@@ -387,7 +329,7 @@ const validCity = function (inputCity) {
   if (cityRegExp.test(inputCity.value)) {
     pCity.innerHTML = "Ville Valide";
     pCity.removeAttribute("style.color");
-    pCity.style.color = "green";
+    pCity.style.color = "#083B32";
     return true;
   } else {
     pCity.innerHTML = "Ville Non Valide";
@@ -414,7 +356,7 @@ const validEmail = function (inputEmail) {
   if (emailRegExp.test(inputEmail.value)) {
     pEmail.innerHTML = "Email Valide";
     pEmail.removeAttribute("style.color");
-    pEmail.style.color = "green";
+    pEmail.style.color = "#083B32";
     return true;
   } else {
     pEmail.innerHTML = "Email Non Valide";
