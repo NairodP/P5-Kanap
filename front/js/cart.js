@@ -41,7 +41,7 @@ function totalQuantity() {
   let targetTotalArticlesQuantity = document.getElementById("totalQuantity");
   tabMerge.forEach((el) => {
     productTotalQuantity.push(el.quantity);
-    let reducer = (accumulateur, productTotal) => accumulateur + productTotal;
+    let reducer = (sum, product) => sum + product;
     let totalQuantity = productTotalQuantity.reduce(reducer, 0);
     targetTotalArticlesQuantity.textContent = totalQuantity;
   });
@@ -131,7 +131,7 @@ function quantityChanged(ev) {
     (nbr) =>
       nbr.id == idProductToUpdate && nbr.colorSelected == colorProductToUpdate
   );
-  productUpdate.quantity = input.value;
+  productUpdate.quantity = parseInt(input.value);
   localStorage.setItem("produit", JSON.stringify(localStorageContent));
   console.log("Quantité produit MAJ dans le LS");
   if (isNaN(input.value) || input.value <= 0) {
@@ -142,7 +142,7 @@ function quantityChanged(ev) {
       tabMerge[index]._id == idProductToUpdate &&
       tabMerge[index].colorSelected == colorProductToUpdate
     ) {
-      tabMerge[index].quantity = input.value;
+      tabMerge[index].quantity = parseInt(input.value);
       totalPrice();
       totalQuantity();
     }
@@ -186,24 +186,6 @@ function cartDisplay(tabMerge) {
 //..............................................
 
 // ..........ENVOI DE LA COMMANDE..............
-let contact = undefined;
-
-// poster la commande du client
-function fetchPost() {
-  fetch("http://localhost:3000/api/products/order", {
-    method: "POST",
-    Headers: {
-      "Content-type": "application/json",
-    },
-    body: JSON.stringify(tabMerge, contact),
-  })
-    .then((res) => res.json())
-    .then((dataPost) => {
-      console.log(dataPost.id); // affiche l'ID client pour la commande
-      let validationId = dataPost.id;
-      document.location = `confirmation.html?${validationId}`;
-    });
-}
 
 // .........GESTION DU FORMULAIRE..............
 let sentBtn = document.getElementById("order");
@@ -212,15 +194,32 @@ let lastName = document.getElementById("lastName");
 let address = document.getElementById("address");
 let city = document.getElementById("city");
 let email = document.getElementById("email");
+let contact = {
+  Prénom: firstName.value,
+  Nom: lastName.value,
+  Adresse: address.value,
+  Ville: city.value,
+  Email: email.value,
+};
+
+// poster la commande du client
+function fetchPost() {
+  fetch("http://localhost:3000/api/products/order", {
+    method: "POST",
+    body: JSON.stringify(contact, tabMerge),
+    Headers: {
+      "Content-type": "application/json",
+    },
+  })
+    .then((res) => res.json())
+    .then((dataPost) => {
+      console.log(dataPost.id); // affiche l'ID client pour la commande
+      // let validationId = dataPost.id;
+      // document.location = `confirmation.html?${validationId}`;
+    });
+}
 
 function sentOrder() {
-  let contact = {
-    Prénom: firstName.value,
-    Nom: lastName.value,
-    Adresse: address.value,
-    Ville: city.value,
-    Email: email.value,
-  };
   //...Ecoute le Click d'envoi de commande
   sentBtn.addEventListener("click", function (e) {
     e.preventDefault();
@@ -233,20 +232,7 @@ function sentOrder() {
       tabMerge &&
       tabMerge.length > 0
     ) {
-      function fetchPost() {
-        fetch("http://localhost:3000/api/products/order", {
-          method: "POST",
-          Headers: {
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify(tabMerge, contact),
-        })
-          .then((res) => res.json())
-          .then(
-            (dataPost) =>
-              (document.location = `confirmation.html?id=${dataPost.id}`)
-          );
-      }
+      fetchPost();
     } else {
       alert("Champ(s) du formulaire Non Valide ou panier Vide !");
       console.log("Champ(s) du formulaire Non Valide ou panier Vide !");
