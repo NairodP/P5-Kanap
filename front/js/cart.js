@@ -39,14 +39,12 @@ function totalPrice() {
 function totalQuantity() {
   let productTotalQuantity = [];
   let targetTotalArticlesQuantity = document.getElementById("totalQuantity");
-
-  for (let i = 0; i < tabMerge.length; i++) {
-    let quantityInCart = tabMerge[i].quantity;
-    productTotalQuantity.push(quantityInCart);
-    let reducer = (accumulateur, product) => accumulateur + product;
-    let totalArticles = productTotalQuantity.reduce(reducer, 0);
-    targetTotalArticlesQuantity.textContent = totalArticles;
-  }
+  tabMerge.forEach((el) => {
+    productTotalQuantity.push(el.quantity);
+    let reducer = (accumulateur, productTotal) => accumulateur + productTotal;
+    let totalQuantity = productTotalQuantity.reduce(reducer, 0);
+    targetTotalArticlesQuantity.textContent = totalQuantity;
+  });
 }
 //.............................................
 
@@ -187,214 +185,214 @@ function cartDisplay(tabMerge) {
 }
 //..............................................
 
-// // ..........ENVOI DE LA COMMANDE..............
-// let contact = undefined;
+// ..........ENVOI DE LA COMMANDE..............
+let contact = undefined;
 
-// // poster la commande du client
-// // function fetchPost() {
-// //   fetch("http://localhost:3000/api/products/order", {
-// //     method: "POST",
-// //     Headers: {
-// //       "Content-type": "application/json",
-// //     },
-// //     body: JSON.stringify(tabMerge, contact),
-// //   })
-// //     .then((res) => res.json())
-// //     .then((dataPost) => {
-// //       console.log(dataPost.id); // affiche l'ID client pour la commande
-// //       let validationId = dataPost.id;
-// //       document.location = `confirmation.html?${validationId}`;
-// //     });
-// // }
+// poster la commande du client
+function fetchPost() {
+  fetch("http://localhost:3000/api/products/order", {
+    method: "POST",
+    Headers: {
+      "Content-type": "application/json",
+    },
+    body: JSON.stringify(tabMerge, contact),
+  })
+    .then((res) => res.json())
+    .then((dataPost) => {
+      console.log(dataPost.id); // affiche l'ID client pour la commande
+      let validationId = dataPost.id;
+      document.location = `confirmation.html?${validationId}`;
+    });
+}
 
-// // .........GESTION DU FORMULAIRE..............
-// let sentBtn = document.getElementById("order");
-// let firstName = document.getElementById("firstName");
-// let lastName = document.getElementById("lastName");
-// let address = document.getElementById("address");
-// let city = document.getElementById("city");
-// let email = document.getElementById("email");
+// .........GESTION DU FORMULAIRE..............
+let sentBtn = document.getElementById("order");
+let firstName = document.getElementById("firstName");
+let lastName = document.getElementById("lastName");
+let address = document.getElementById("address");
+let city = document.getElementById("city");
+let email = document.getElementById("email");
 
-// function sentOrder() {
-//   let contact = {
-//     Prénom: firstName.value,
-//     Nom: lastName.value,
-//     Adresse: address.value,
-//     Ville: city.value,
-//     Email: email.value,
-//   };
-//   //...Ecoute le Click d'envoi de commande
-//   sentBtn.addEventListener("click", function (e) {
-//     e.preventDefault();
-//     if (
-//       validFirstName(firstName) &&
-//       validLastName(lastName) &&
-//       validAddress(address) &&
-//       validCity(city) &&
-//       validEmail(email) &&
-//       tabMerge &&
-//       tabMerge.length > 0
-//     ) {
-//       function fetchPost() {
-//         fetch("http://localhost:3000/api/products/order", {
-//           method: "POST",
-//           Headers: {
-//             "Content-type": "application/json",
-//           },
-//           body: JSON.stringify(tabMerge, contact),
-//         })
-//           .then((res) => res.json())
-//           .then(
-//             (dataPost) =>
-//               (document.location = `confirmation.html?id=${dataPost.id}`)
-//           );
-//       }
-//     } else {
-//       alert("Champ(s) du formulaire Non Valide ou panier Vide !");
-//       console.log("Champ(s) du formulaire Non Valide ou panier Vide !");
-//     }
-//   });
-// }
+function sentOrder() {
+  let contact = {
+    Prénom: firstName.value,
+    Nom: lastName.value,
+    Adresse: address.value,
+    Ville: city.value,
+    Email: email.value,
+  };
+  //...Ecoute le Click d'envoi de commande
+  sentBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    if (
+      validFirstName(firstName) &&
+      validLastName(lastName) &&
+      validAddress(address) &&
+      validCity(city) &&
+      validEmail(email) &&
+      tabMerge &&
+      tabMerge.length > 0
+    ) {
+      function fetchPost() {
+        fetch("http://localhost:3000/api/products/order", {
+          method: "POST",
+          Headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify(tabMerge, contact),
+        })
+          .then((res) => res.json())
+          .then(
+            (dataPost) =>
+              (document.location = `confirmation.html?id=${dataPost.id}`)
+          );
+      }
+    } else {
+      alert("Champ(s) du formulaire Non Valide ou panier Vide !");
+      console.log("Champ(s) du formulaire Non Valide ou panier Vide !");
+    }
+  });
+}
 
-// //Ecoute la modification du Prénom
-// firstName.addEventListener("change", function () {
-//   validFirstName(this);
-// });
+//Ecoute la modification du Prénom
+firstName.addEventListener("change", function () {
+  validFirstName(this);
+});
 
-// //Ecoute la modification du Nom de famille
-// lastName.addEventListener("change", function () {
-//   validLastName(this);
-// });
+//Ecoute la modification du Nom de famille
+lastName.addEventListener("change", function () {
+  validLastName(this);
+});
 
-// //Ecoute la modification de l'adresse
-// address.addEventListener("change", function () {
-//   validAddress(this);
-// });
+//Ecoute la modification de l'adresse
+address.addEventListener("change", function () {
+  validAddress(this);
+});
 
-// //Ecoute la modification de la ville
-// city.addEventListener("change", function () {
-//   validCity(this);
-// });
+//Ecoute la modification de la ville
+city.addEventListener("change", function () {
+  validCity(this);
+});
 
-// //Ecoute la modification de l'email
-// email.addEventListener("change", function () {
-//   validEmail(this);
-// });
+//Ecoute la modification de l'email
+email.addEventListener("change", function () {
+  validEmail(this);
+});
 
-// // VALIDATION FIRSTNAME
-// function validFirstName(inputFirstName) {
-//   //Creation de la RegExp pour validation FirstName
-//   let FirstNameRegExp = new RegExp("^[a-z A-ZA-zÀ-ú-']+$", "g");
+// VALIDATION FIRSTNAME
+function validFirstName(inputFirstName) {
+  //Creation de la RegExp pour validation FirstName
+  let FirstNameRegExp = new RegExp("^[a-z A-ZA-zÀ-ú-']+$", "g");
 
-//   // Recup paragraphe pour afficher le message
-//   let pFirstName = document.getElementById("firstNameErrorMsg");
+  // Recup paragraphe pour afficher le message
+  let pFirstName = document.getElementById("firstNameErrorMsg");
 
-//   // Test de l'Expression Regulière
-//   if (FirstNameRegExp.test(inputFirstName.value)) {
-//     pFirstName.innerHTML = "Prénom Valide";
-//     pFirstName.removeAttribute("style.color");
-//     pFirstName.style.color = "#083B32";
-//     return true;
-//   } else {
-//     pFirstName.innerHTML = "Prénom Non Valide";
-//     pFirstName.removeAttribute("style.color");
-//     pFirstName.style.color = "red";
-//     return false;
-//   }
-// }
+  // Test de l'Expression Regulière
+  if (FirstNameRegExp.test(inputFirstName.value)) {
+    pFirstName.innerHTML = "Prénom Valide";
+    pFirstName.removeAttribute("style.color");
+    pFirstName.style.color = "#083B32";
+    return true;
+  } else {
+    pFirstName.innerHTML = "Prénom Non Valide";
+    pFirstName.removeAttribute("style.color");
+    pFirstName.style.color = "red";
+    return false;
+  }
+}
 
-// // VALIDATION LASTNAME
-// function validLastName(inputLastName) {
-//   //Creation de la RegExp pour validation lastName
-//   let lastNameRegExp = new RegExp("^[a-z A-ZA-zÀ-ú-']+$", "g");
+// VALIDATION LASTNAME
+function validLastName(inputLastName) {
+  //Creation de la RegExp pour validation lastName
+  let lastNameRegExp = new RegExp("^[a-z A-ZA-zÀ-ú-']+$", "g");
 
-//   // Recup paragraphe pour afficher le message
-//   let pLastName = document.getElementById("lastNameErrorMsg");
+  // Recup paragraphe pour afficher le message
+  let pLastName = document.getElementById("lastNameErrorMsg");
 
-//   // Test de l'Expression Regulière
-//   if (lastNameRegExp.test(inputLastName.value)) {
-//     pLastName.innerHTML = "Nom Valide";
-//     pLastName.removeAttribute("style.color");
-//     pLastName.style.color = "#083B32";
-//     return true;
-//   } else {
-//     pLastName.innerHTML = "Nom Non Valide";
-//     pLastName.removeAttribute("style.color");
-//     pLastName.style.color = "red";
-//     return false;
-//   }
-// }
+  // Test de l'Expression Regulière
+  if (lastNameRegExp.test(inputLastName.value)) {
+    pLastName.innerHTML = "Nom Valide";
+    pLastName.removeAttribute("style.color");
+    pLastName.style.color = "#083B32";
+    return true;
+  } else {
+    pLastName.innerHTML = "Nom Non Valide";
+    pLastName.removeAttribute("style.color");
+    pLastName.style.color = "red";
+    return false;
+  }
+}
 
-// // VALIDATION ADRESSE
-// function validAddress(inputAddress) {
-//   //Creation de la RegExp pour validation address
-//   let addressRegExp = new RegExp("^[0-9]{1,3} [a-z A-ZA-zÀ-ú-']{3,100}$", "g");
+// VALIDATION ADRESSE
+function validAddress(inputAddress) {
+  //Creation de la RegExp pour validation address
+  let addressRegExp = new RegExp("^[0-9]{1,3} [a-z A-ZA-zÀ-ú-']{3,100}$", "g");
 
-//   // Recup paragraphe pour afficher le message
-//   let pAddress = document.getElementById("addressErrorMsg");
+  // Recup paragraphe pour afficher le message
+  let pAddress = document.getElementById("addressErrorMsg");
 
-//   // Test de l'Expression Regulière
-//   if (addressRegExp.test(inputAddress.value)) {
-//     pAddress.innerHTML = "Adresse Valide";
-//     pAddress.removeAttribute("style.color");
-//     pAddress.style.color = "#083B32";
-//     return true;
-//   } else {
-//     pAddress.innerHTML = "Adresse Non Valide";
-//     pAddress.removeAttribute("style.color");
-//     pAddress.style.color = "red";
-//     return false;
-//   }
-// }
+  // Test de l'Expression Regulière
+  if (addressRegExp.test(inputAddress.value)) {
+    pAddress.innerHTML = "Adresse Valide";
+    pAddress.removeAttribute("style.color");
+    pAddress.style.color = "#083B32";
+    return true;
+  } else {
+    pAddress.innerHTML = "Adresse Non Valide";
+    pAddress.removeAttribute("style.color");
+    pAddress.style.color = "red";
+    return false;
+  }
+}
 
-// // VALIDATION VILLE
-// function validCity(inputCity) {
-//   //Creation de la RegExp pour validation city
-//   let cityRegExp = new RegExp(
-//     "^([a-zA-Z\u0080-\u024F]+(?:. |-| |'))*[a-zA-Z\u0080-\u024F]*$",
-//     "g"
-//   );
+// VALIDATION VILLE
+function validCity(inputCity) {
+  //Creation de la RegExp pour validation city
+  let cityRegExp = new RegExp(
+    "^([a-zA-Z\u0080-\u024F]+(?:. |-| |'))*[a-zA-Z\u0080-\u024F]*$",
+    "g"
+  );
 
-//   // Recup paragraphe pour afficher le message
-//   let pCity = document.getElementById("cityErrorMsg");
+  // Recup paragraphe pour afficher le message
+  let pCity = document.getElementById("cityErrorMsg");
 
-//   // Test de l'Expression Regulière
-//   if (cityRegExp.test(inputCity.value)) {
-//     pCity.innerHTML = "Ville Valide";
-//     pCity.removeAttribute("style.color");
-//     pCity.style.color = "#083B32";
-//     return true;
-//   } else {
-//     pCity.innerHTML = "Ville Non Valide";
-//     pCity.removeAttribute("style.color");
-//     pCity.style.color = "red";
-//     return false;
-//   }
-// }
+  // Test de l'Expression Regulière
+  if (cityRegExp.test(inputCity.value)) {
+    pCity.innerHTML = "Ville Valide";
+    pCity.removeAttribute("style.color");
+    pCity.style.color = "#083B32";
+    return true;
+  } else {
+    pCity.innerHTML = "Ville Non Valide";
+    pCity.removeAttribute("style.color");
+    pCity.style.color = "red";
+    return false;
+  }
+}
 
-// // VALIDATION EMAIL
-// function validEmail(inputEmail) {
-//   //Creation de la RegExp pour validation email
-//   let emailRegExp = new RegExp(
-//     "^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$",
-//     "g"
-//   );
-//   // Commence par des caractères majuscules, minuscules,chiffres de 0 à 9 ou encore des ".", "-" ou "_". Ces caractères peuvent ête écrit une fois ou plusieurs. il y a à la suite un seul @ qui ne pourra plus être écrit. De nous les mêmes caractères qu'au début peuvent être éctit. Un "." viendra séparer cette partie de la suivante et sera le dernier point qui pourra être renseigné. Pour finir des caractères devront être écrit. il doit y avoir entre 2 et 10 caractères forcément en minuscule.
-//   // Le marqueur "g" indique que le RegExp est lu de manière globale.
+// VALIDATION EMAIL
+function validEmail(inputEmail) {
+  //Creation de la RegExp pour validation email
+  let emailRegExp = new RegExp(
+    "^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$",
+    "g"
+  );
+  // Commence par des caractères majuscules, minuscules,chiffres de 0 à 9 ou encore des ".", "-" ou "_". Ces caractères peuvent ête écrit une fois ou plusieurs. il y a à la suite un seul @ qui ne pourra plus être écrit. De nous les mêmes caractères qu'au début peuvent être éctit. Un "." viendra séparer cette partie de la suivante et sera le dernier point qui pourra être renseigné. Pour finir des caractères devront être écrit. il doit y avoir entre 2 et 10 caractères forcément en minuscule.
+  // Le marqueur "g" indique que le RegExp est lu de manière globale.
 
-//   // Recup paragraphe pour afficher le message
-//   let pEmail = document.getElementById("emailErrorMsg");
+  // Recup paragraphe pour afficher le message
+  let pEmail = document.getElementById("emailErrorMsg");
 
-//   // Test de l'Expression Regulière
-//   if (emailRegExp.test(inputEmail.value)) {
-//     pEmail.innerHTML = "Email Valide";
-//     pEmail.removeAttribute("style.color");
-//     pEmail.style.color = "#083B32";
-//     return true;
-//   } else {
-//     pEmail.innerHTML = "Email Non Valide";
-//     pEmail.removeAttribute("style.color");
-//     pEmail.style.color = "red";
-//     return false;
-//   }
-// }
+  // Test de l'Expression Regulière
+  if (emailRegExp.test(inputEmail.value)) {
+    pEmail.innerHTML = "Email Valide";
+    pEmail.removeAttribute("style.color");
+    pEmail.style.color = "#083B32";
+    return true;
+  } else {
+    pEmail.innerHTML = "Email Non Valide";
+    pEmail.removeAttribute("style.color");
+    pEmail.style.color = "red";
+    return false;
+  }
+}
