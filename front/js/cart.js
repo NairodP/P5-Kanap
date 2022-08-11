@@ -194,51 +194,57 @@ let lastName = document.getElementById("lastName");
 let address = document.getElementById("address");
 let city = document.getElementById("city");
 let email = document.getElementById("email");
-let contact = {
-  Prénom: firstName.value,
-  Nom: lastName.value,
-  Adresse: address.value,
-  Ville: city.value,
-  Email: email.value,
-};
+let orderId = undefined;
 
 // poster la commande du client
-function fetchPost() {
-  fetch("http://localhost:3000/api/products/order", {
+function fetchPost(order) {
+  fetch(`http://localhost:3000/api/products/order`, {
     method: "POST",
-    body: JSON.stringify(contact, tabMerge),
-    Headers: {
-      "Content-type": "application/json",
+    body: JSON.stringify(order),
+    headers: {
+      "Content-Type": "application/json",
     },
   })
     .then((res) => res.json())
     .then((dataPost) => {
-      console.log(dataPost.id); // affiche l'ID client pour la commande
-      // let validationId = dataPost.id;
-      // document.location = `confirmation.html?${validationId}`;
-    });
+      dataPost = orderId;
+      document.location = `confirmation.html?id=${orderId.id}`;
+    })
+    .catch((error) => alert(error));
 }
 
 function sentOrder() {
-  //...Ecoute le Click d'envoi de commande
-  sentBtn.addEventListener("click", function (e) {
-    e.preventDefault();
-    if (
-      validFirstName(firstName) &&
-      validLastName(lastName) &&
-      validAddress(address) &&
-      validCity(city) &&
-      validEmail(email) &&
-      tabMerge &&
-      tabMerge.length > 0
-    ) {
-      fetchPost();
-    } else {
-      alert("Champ(s) du formulaire Non Valide ou panier Vide !");
-      console.log("Champ(s) du formulaire Non Valide ou panier Vide !");
-    }
-  });
+  if (
+    validFirstName(firstName) &&
+    validLastName(lastName) &&
+    validAddress(address) &&
+    validCity(city) &&
+    validEmail(email) &&
+    tabMerge &&
+    tabMerge.length > 0
+  ) {
+    let contact = {
+      firstName: firstName.value,
+      lastName: lastName.value,
+      address: address.value,
+      city: city.value,
+      email: email.value,
+    };
+    let order = {
+      contact: contact,
+      products: tabMerge.map((el) => el._id),
+    };
+    fetchPost(order);
+  } else {
+    alert("Champ(s) du formulaire Non Valide ou panier Vide !");
+    console.log("Champ(s) du formulaire Non Valide ou panier Vide !");
+  }
 }
+//...Ecoute le Click d'envoi de commande
+sentBtn.addEventListener("click", function (e) {
+  e.preventDefault();
+  sentOrder();
+});
 
 //Ecoute la modification du Prénom
 firstName.addEventListener("change", function () {
