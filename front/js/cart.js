@@ -23,28 +23,25 @@ function merge(productsData, localStorageContent) {
 
 // CALCUL PRIX TOTAL PANIER
 function totalPrice() {
-  let productsTotalPrice = [];
   let targetTotalPrice = document.getElementById("totalPrice");
-  tabMerge.forEach((el) => {
-    productsTotalPrice.push(el.price * el.quantity);
-  });
-  let reducer = (accumulateur, productTotal) => accumulateur + productTotal;
-  let totalPrice = productsTotalPrice.reduce(reducer, 0);
-  targetTotalPrice.textContent = totalPrice;
+  let reducer = (accumulateur, productTotal) =>
+    accumulateur + productTotal.price * productTotal.quantity;
+  targetTotalPrice.textContent = tabMerge.reduce(reducer, 0);
   // réduit le tableau à un résultat
 }
 //.............................................
 
 // CALCUL LA QUANTITÉ TOTALE DE PRODUITS DANS LE PANIER
 function totalQuantity() {
-  let productTotalQuantity = [];
   let targetTotalArticlesQuantity = document.getElementById("totalQuantity");
-  tabMerge.forEach((el) => {
-    productTotalQuantity.push(el.quantity);
-    let reducer = (sum, product) => sum + product;
-    let totalQuantity = productTotalQuantity.reduce(reducer, 0);
-    targetTotalArticlesQuantity.textContent = totalQuantity;
-  });
+  // tabMerge.forEach((el) => {
+  //   productTotalQuantity.push(el.quantity);
+  //   let reducer = (sum, product) => sum + product;
+  //   let totalQuantity = productTotalQuantity.reduce(reducer, 0);
+  //   targetTotalArticlesQuantity.textContent = totalQuantity;
+  // });
+  let reducer = (sum, product) => sum + product.quantity;
+  targetTotalArticlesQuantity.textContent = tabMerge.reduce(reducer, 0);
 }
 //.............................................
 
@@ -66,7 +63,16 @@ if (localStorageContent) {
       cartDisplay(tabMerge);
     })
     .catch((error) => alert(error));
-} else alert("VOTRE PANIER EST VIDE");
+} else {
+  alert("VOTRE PANIER EST VIDE");
+  let cart = document.querySelector(".cart");
+  cart.remove();
+  // let titleCart = document.querySelector("#cartAndFormContainer h1");
+  // titleCart.innerHTML = "Votre Panier est vide !";
+  // let textPanierVide = document.querySelector(".cart__price p");
+  // textPanierVide.innerHTML = "";
+}
+
 //..............................................
 
 // SUPPRIME L'ARTICLE DU PANIER AU CLIC SUR LE BTN 'supprimer'
@@ -75,21 +81,23 @@ function removeToCard() {
   for (let i = 0; i < removeToCardBtn.length; i++) {
     let buttonDelete = removeToCardBtn[i];
     buttonDelete.addEventListener("click", (ev) => {
-      ev.preventDefault;
       let input = ev.target;
       let inputData =
         input.parentElement.parentElement.parentElement.parentElement;
       let idProductForDelete = inputData.dataset.id;
       let colorProductForDelete = inputData.dataset.color;
-      console.log(
-        "produit supprimé :",
-        idProductForDelete,
-        colorProductForDelete
-      );
       let indexProductDelete = localStorageContent.findIndex(
         (nbr) =>
           nbr.id == idProductForDelete &&
           nbr.colorSelected == colorProductForDelete
+      );
+      if (indexProductDelete < 0) {
+        return;
+      }
+      console.log(
+        "produit supprimé :",
+        idProductForDelete,
+        colorProductForDelete
       );
       localStorageContent.splice(indexProductDelete, 1);
       localStorage.setItem("produit", JSON.stringify(localStorageContent));
@@ -150,6 +158,13 @@ function quantityChanged(ev) {
 }
 //.............................................
 
+// function checkIfNull() {
+//   if ((localStorageContent.length == 0)) {
+//     let cart = document.querySelector(".cart");
+//     cart.remove();
+//   }
+// }
+
 // AFFICHAGE PRODUITS DANS LE PANIER SI ÉLÉMENTS PRÉSENTS DANS LE LS
 function cartDisplay(tabMerge) {
   if (tabMerge) {
@@ -181,6 +196,7 @@ function cartDisplay(tabMerge) {
       .join("");
     removeToCard();
     updateQuantityProduct();
+    // checkIfNull();
   }
 }
 //..............................................
@@ -206,10 +222,10 @@ function fetchPost(order) {
     },
   })
     .then((res) => res.json())
-    .then((dataPost) => {
-      dataPost = orderId;
-      document.location = `confirmation.html?id=${orderId.id}`;
-    })
+    .then(
+      (idCommande) =>
+        (document.location = `confirmation.html?id=${idCommande.orderId}`)
+    )
     .catch((error) => alert(error));
 }
 
@@ -241,35 +257,47 @@ function sentOrder() {
   }
 }
 //...Ecoute le Click d'envoi de commande
-sentBtn.addEventListener("click", function (e) {
-  e.preventDefault();
-  sentOrder();
-});
+if (localStorageContent) {
+  sentBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    sentOrder();
+  });
+}
 
 //Ecoute la modification du Prénom
-firstName.addEventListener("change", function () {
-  validFirstName(this);
-});
+if (localStorageContent) {
+  firstName.addEventListener("change", function () {
+    validFirstName(this);
+  });
+}
 
 //Ecoute la modification du Nom de famille
-lastName.addEventListener("change", function () {
-  validLastName(this);
-});
+if (localStorageContent) {
+  lastName.addEventListener("change", function () {
+    validLastName(this);
+  });
+}
 
 //Ecoute la modification de l'adresse
-address.addEventListener("change", function () {
-  validAddress(this);
-});
+if (localStorageContent) {
+  address.addEventListener("change", function () {
+    validAddress(this);
+  });
+}
 
 //Ecoute la modification de la ville
-city.addEventListener("change", function () {
-  validCity(this);
-});
+if (localStorageContent) {
+  city.addEventListener("change", function () {
+    validCity(this);
+  });
+}
 
 //Ecoute la modification de l'email
-email.addEventListener("change", function () {
-  validEmail(this);
-});
+if (localStorageContent) {
+  email.addEventListener("change", function () {
+    validEmail(this);
+  });
+}
 
 // VALIDATION FIRSTNAME
 function validFirstName(inputFirstName) {
